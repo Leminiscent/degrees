@@ -24,7 +24,7 @@ def load_data(directory):
             people[row["id"]] = {
                 "name": row["name"],
                 "birth": row["birth"],
-                "movies": set()
+                "movies": set(),
             }
             if row["name"].lower() not in names:
                 names[row["name"].lower()] = {row["id"]}
@@ -38,7 +38,7 @@ def load_data(directory):
             movies[row["id"]] = {
                 "title": row["title"],
                 "year": row["year"],
-                "stars": set()
+                "stars": set(),
             }
 
     # Load stars
@@ -92,8 +92,42 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    # Initialize the frontier with the source
+    start = Node(state=source, parent=None, action=None)
+    frontier = QueueFrontier()
+    frontier.add(start)
+
+    # Set to keep track of explored actors
+    explored = set()
+
+    # Loop until the frontier is empty
+    while not frontier.empty():
+        # Remove a node from the frontier
+        node = frontier.remove()
+
+        # Mark the node as explored
+        explored.add(node.state)
+
+        # Expand this node
+        for movie_id, person_id in neighbors_for_person(node.state):
+            if not frontier.contains_state(person_id) and person_id not in explored:
+                child = Node(state=person_id, parent=node, action=movie_id)
+
+                # Check if the child node is the target
+                if child.state == target:
+                    # If it's the target, construct the path back to the source
+                    path = []
+                    while child.parent is not None:
+                        path.append((child.action, child.state))
+                        child = child.parent
+                    path.reverse()
+                    return path
+
+                # Add this node to the frontier
+                frontier.add(child)
+
+    # If no path is found
+    return None
 
 
 def person_id_for_name(name):
